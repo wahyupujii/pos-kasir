@@ -88,8 +88,9 @@ If you have an error like this when run in the browser, run this command in your
 chmod -R 777 storage bootstrap/cache
 ```
 
-### To do
-- User Management (Login, Register)
+### To do & Doing
+- User Management (Login, Register) ✅
 - Role Management (Admin, User)
+- Transaction By Payment Gateway
 - Report Transaction each User
 - Gmail Notification
