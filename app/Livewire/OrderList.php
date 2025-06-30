@@ -18,6 +18,7 @@ class OrderList extends Component
         return view('livewire.order-list', [
             'orders' => Order::search($this->search)
                         ->whereNotNull('done_at')
+                        ->where('user_id', auth()->id())
                         ->orderBy('done_at', 'DESC')
                         ->paginate($this->perPage)
         ]);

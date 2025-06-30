@@ -13,7 +13,9 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignId('user_id');
             $table->string('invoice_number')->unique();
+            $table->string('payment_url')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
