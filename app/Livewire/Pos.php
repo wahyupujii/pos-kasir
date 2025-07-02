@@ -33,6 +33,7 @@ class Pos extends Component
     public function createOrder()
     {
         $this->order = Order::where('done_at', null)
+            ->where('user_id', auth()->id())
             ->latest()
             ->first();
 

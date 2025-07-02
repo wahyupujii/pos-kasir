@@ -3,16 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use App\Models\PaymentLog;
 use Illuminate\Http\Request;
 
 class WebhookController extends Controller
 {
     public function webhook(Request $request)
     {
-        $orderId = $request['order_id'];
-        $transactionStatus = $request['transaction_status'];
-        $fraudStatus = $request['fraud_status'];
-        $grossAmount = $request['gross_amount'];
+        $data = $request->all();
+        $orderId = $data['order_id'];
+        $transactionStatus = $data['transaction_status'];
+        $fraudStatus = $data['fraud_status'];
+        $grossAmount = $data['gross_amount'];
+        $paymentType = $data['payment_type'];
 
         $order = Order::findOrFail($orderId);
         $orderStatus = false;
@@ -47,5 +50,14 @@ class WebhookController extends Controller
 
             $order->save();
         }
+
+        $logData = [
+            'status' => $transactionStatus,
+            'order_id' => $orderId,
+            'payment_type' => $paymentType,
+            'raw_response' => json_encode($data)
+        ];
+
+        PaymentLog::create($logData);
     }
 }
