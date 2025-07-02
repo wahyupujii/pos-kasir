@@ -4,6 +4,8 @@
 
 This project is a simple Point of Sale (POS) or cashier application built using Laravel, Livewire 3, and Bootstrap.
 
+(This is a project for me to learn how to use Laravel and payment gateway :))
+
 ## Table of Contents
 
 - [Features](#features)
@@ -116,6 +118,6 @@ In development, you need to install ```ngrok``` for using Midtrans Webhook and M
 ### To do & Doing
 - User Management (Login, Register) ✅
 - Role Management (Admin, User)
-- Transaction By Payment Gateway
-- Report Transaction each User
+- Transaction By Payment Gateway ✅
+- Report Transaction each User ✅
 - Gmail Notification
