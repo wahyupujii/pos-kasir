@@ -1,0 +1,51 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pos-kasir
+    working_dir: /var/www
+    volumes:
+      - ./:/var/www
+    ports:
+      - "9000:9000"
+    networks:
+      - laravel
+    depends_on:
+      - db
+
+  webserver:
+    image: nginx:alpine
+    container_name: pos-kasir-webserver
+    ports:
+      - "8000:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    depends_on:
+      - app
+    networks:
+      - laravel
+
+  db:
+    image: mysql:8.0
+    container_name: pos-kasir-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: poskasir
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_USER: poskasir
+      MYSQL_PASSWORD: poskasir
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - laravel
+
+volumes:
+  dbdata:
+
+networks:
+  laravel:
+    driver: bridge
