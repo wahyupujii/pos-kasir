@@ -16,10 +16,17 @@ class Order extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
+        'user_id',
         'invoice_number',
         'done_at',
-        'paid_amount'
+        'paid_amount',
+        'payment_url'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function orderProducts()
     {
