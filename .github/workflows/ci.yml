@@ -29,8 +29,12 @@ jobs:
       - name: Get Git Tag
         id: get_tag
         run: |
-          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          if [ -z "$TAG" ]; then
+            echo "tag=staging-latest" >> $GITHUB_OUTPUT
+          else
+            echo "tag=$TAG" >> $GITHUB_OUTPUT
+          fi
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
@@ -40,7 +44,6 @@ jobs:
           push: true
           tags: |
             ${{ env.IMAGE_NAME }}:${{ steps.get_tag.outputs.tag }}
-            ${{ env.IMAGE_NAME }}:staging-latest
         continue-on-error: false
 
       - name: Logout from Docker Hub
