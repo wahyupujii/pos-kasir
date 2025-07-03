@@ -17,7 +17,6 @@
                         </div>
                         @endif
                         <form wire:submit.prevent="login">
-
                             <div class="form-group mb-4">
                                 <label class="font-weight-bold">ALAMAT EMAIL</label>
                                 <input type="text" wire:model.lazy="email"
