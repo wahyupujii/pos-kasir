@@ -26,12 +26,11 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
 
-      - name: Extract version from Git tag or fallback
-        id: extract_version
+      - name: Get Git Tag
+        id: get_tag
         run: |
-          VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "staging-latest")
-          echo "VERSION=$VERSION"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
 
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
@@ -40,8 +39,9 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: |
-            ${{ env.IMAGE_NAME }}:${{ steps.extract_version.outputs.version }}
+            ${{ env.IMAGE_NAME }}:${{ steps.get_tag.outputs.tag }}
             ${{ env.IMAGE_NAME }}:staging-latest
+        continue-on-error: false
 
       - name: Logout from Docker Hub
         run: docker logout
