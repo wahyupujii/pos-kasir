@@ -4,11 +4,14 @@
 
 This project is a simple Point of Sale (POS) or cashier application built using Laravel, Livewire 3, and Bootstrap.
 
+(This is a project for me to learn how to use Laravel and payment gateway :))
+
 ## Table of Contents
 
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Midtrans](#midtrans)
 
 ## Features
 
@@ -88,9 +91,33 @@ If you have an error like this when run in the browser, run this command in your
 chmod -R 777 storage bootstrap/cache
 ```
 
+### Midtrans
+
+In development, you need to install ```ngrok``` for using Midtrans Webhook and Midtrans Redirect Route after payment.
+
+- Login Midtrans as Merchant
+
+- Copy Server Key and Client Key, then paste to .env
+    ```
+    MIDTRANS_SERVER_KEY=<YOUR KEY>
+    MIDTRANS_CLIENT_KEY=<YOUR KEY>
+    ```
+
+- Webhook
+    On menu Setting -> Payment -> Choose Notification URL -> fill the form of Payment notification URL with combination like this: 
+    ```
+    <yourdomainofngrok>/api/webhook
+    ```
+
+- Redirect After Payment
+    On menu Setting -> Snap Preferences, tab System Settings -> Redirection Settings -> Finish URL. Fill the form with combination like this: 
+    ```
+    <yourdomainofngrok>/api/to-order
+    ```
+
 ### To do & Doing
 - User Management (Login, Register) ✅
 - Role Management (Admin, User)
-- Transaction By Payment Gateway
-- Report Transaction each User
+- Transaction By Payment Gateway ✅
+- Report Transaction each User ✅
 - Gmail Notification

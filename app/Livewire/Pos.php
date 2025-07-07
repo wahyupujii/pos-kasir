@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\OrderProduct;
+use Illuminate\Validation\ValidationException;
 
 class Pos extends Component
 {
@@ -18,9 +19,10 @@ class Pos extends Component
     public function render()
     {
         $this->order = Order::where('done_at', null)
-                ->with('orderProducts')
-                ->latest()
-                ->first();
+            ->where('user_id', auth()->id())
+            ->with('orderProducts')
+            ->latest()
+            ->first();
         $this->total_price = $this->order->total_price ?? 0;
         return view('livewire.pos', [
             'products' => Product::search($this->search)->paginate(12),
@@ -31,11 +33,13 @@ class Pos extends Component
     public function createOrder()
     {
         $this->order = Order::where('done_at', null)
-                ->latest()
-                ->first();
+            ->where('user_id', auth()->id())
+            ->latest()
+            ->first();
 
         if ($this->order ==  null) {
             $this->order = Order::create([
+                'user_id' => auth()->id(),
                 'invoice_number' => $this->generateUniqueCode()
             ]);
         }
@@ -50,7 +54,7 @@ class Pos extends Component
                 $orderProduct = OrderProduct::where('order_id', $this->order->id)
                     ->where('product_id', $productId)
                     ->first();
-                
+
                 if ($orderProduct) {
                     if ($isAdded) {
                         $orderProduct->increment('quantity', 1);
@@ -79,12 +83,47 @@ class Pos extends Component
             } else {
                 session()->flash('message', 'Klik Mulai Transaksi Dahulu');
             }
-            
         } catch (ValidationException $e) {
             dd($e);
         } catch (\Exception $e) {
             dd($e);
         }
+    }
+
+    public function payment()
+    {
+        \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+        \Midtrans\Config::$isProduction = false;
+        \Midtrans\Config::$is3ds = true;
+
+        $params = array(
+            'transaction_details' => array(
+                'order_id' => $this->order->id,
+                'gross_amount' => $this->order->total_price,
+            ),
+            'customer_details' => array(
+                'first_name' => $this->order->user->name,
+                'email' => $this->order->user->email,
+            ),
+        );
+
+        $orderProductList = OrderProduct::with('product')->where('order_id', $this->order->id);
+
+        $params['item_details'] = $orderProductList->get()->map(function ($orderProduct) {
+            return [
+                'price' => $orderProduct->unit_price,
+                'quantity' => $orderProduct->quantity,
+                'name' => $orderProduct->product->name,
+            ];
+        })->toArray();
+
+        $snapUrl = \Midtrans\Snap::createTransaction($params)->redirect_url;
+
+        $this->order->update([
+            'payment_url' => $snapUrl
+        ]);
+
+        return redirect($snapUrl);
     }
 
     public function done()
@@ -102,15 +141,15 @@ class Pos extends Component
         return redirect()->route('order');
     }
 
-    function generateUniqueCode($length = 6) {
+    function generateUniqueCode($length = 6)
+    {
         $number = uniqid();
         $varray = str_split($number);
         $len = sizeof($varray);
-        $uniq = array_slice($varray, $len-6, $len);
+        $uniq = array_slice($varray, $len - 6, $len);
         $uniq = implode(",", $uniq);
         $uniq = str_replace(',', '', $uniq);
 
         return $uniq;
     }
-
 }
